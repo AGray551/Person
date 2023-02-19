@@ -8,43 +8,33 @@ import java.util.ArrayList;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 public class PersonGenerator {
-    public static void main(String[] args)
-    {
-        ArrayList<String> people = new ArrayList<>();
+    public static void main(String[] args) {
+        ArrayList<Person> people = new ArrayList<>();
         Scanner in = new Scanner(System.in);
 
         File workingDirectory = new File(System.getProperty("user.dir"));
-        Path file = Paths.get(workingDirectory.getPath() + "\\src\\peopleData.txt");
+        Path file = Paths.get(workingDirectory.getPath() + "\\src\\personData.csv");
 
         boolean done = false;
 
-        String personRec = "";
-        String ID = "";
-        String firstName = "";
-        String lastName = "";
-        String titleName = "";
-        int birth = 0;
-
-
         do {
-            ID = SafeInput.getNonZeroLenString(in,"Enter the ID [6 digits]: ");
-            firstName = SafeInput.getNonZeroLenString(in,"Enter the first name: ");
-            lastName = SafeInput.getNonZeroLenString(in,"Enter the last name: ");
-            titleName = SafeInput.getNonZeroLenString(in,"Enter the title name: ");
-            birth = SafeInput.getRangedInt(in, "Enter the year of birth: ", 1000, 9999);
+            String ID = SafeInput.getNonZeroLenString(in, "Enter the ID [6 digits]: ");
+            String firstName = SafeInput.getNonZeroLenString(in, "Enter the first name: ");
+            String lastName = SafeInput.getNonZeroLenString(in, "Enter the last name: ");
+            String titleName = SafeInput.getNonZeroLenString(in, "Enter the title name: ");
+            int birth = SafeInput.getRangedInt(in, "Enter the year of birth: ", 1000, 9999);
 
-            personRec = ID + ", " + firstName+ ", " + lastName+ ", " + titleName+ ", " + birth;
-            people.add(personRec);
+            Person person = new Person(ID, firstName, lastName, titleName, birth);
+            people.add(person);
 
-            done = SafeInput.getYNConfirm(in, "Are you done?" );
+            done = SafeInput.getYNConfirm(in, "Are you done?");
 
-        }while(!done);
+        } while (!done);
 
-        for(String p: people)
+        for (Person p : people)
             System.out.println(p);
 
-        try
-        {
+        try {
             // Typical java pattern of inherited classes
             // we wrap a BufferedWriter around a lower level BufferedOutputStream
             OutputStream out =
@@ -52,22 +42,16 @@ public class PersonGenerator {
             BufferedWriter writer =
                     new BufferedWriter(new OutputStreamWriter(out));
 
-            // Finally can write the file LOL!
-
-            for(String rec : people)
-            {
-                writer.write(rec, 0, rec.length());  // stupid syntax for write rec
-                // 0 is where to start (1st char) the write
-                // rec. length() is how many chars to write (all)
+            for (Person person : people) {
+                String csvRecord = person.toCSVRecord();
+                writer.write(csvRecord, 0, csvRecord.length());
                 writer.newLine();  // adds the new line
 
             }
             writer.close(); // must close the file to seal it and flush buffer
             System.out.println("Data file written!");
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        }
     }
+}
